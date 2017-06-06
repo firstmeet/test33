@@ -13,9 +13,11 @@
         </div>
         <button @click="delAll()" v-if="all_show">删除全部</button>
         <button @click="api_upload()" v-if="all_show">上传</button>
+<transition name="fade">
         <div v-show="max_show" @click="no_show" id="max_show" style="width: 100%;height: 100%">
          <img :src="max_pic" alt="" id="max_img" width="auto" height="auto">
             </div>
+    </transition>
     </div>
 
 </template>
@@ -122,14 +124,16 @@
             },
             api_upload(){
                 this.$http.post('http://dbshicai2.dev/mobile/te/vue_upload', this.uploadList).then(success => {
-                    console.log(success);
+//                    this.imageList=[];
+//                    success.body.forEach((item,index)=>{
+//                        this.imageList.push({'index':index,'img':'http://dbshicai2.dev'+item});
+//                    })
+
                 })
             },
             show_all(event){
                 let self=this;
                 let src=event.target.getAttribute('data-url');
-               let hei=event.target.height;
-               let wid=event.target.width;
 
                 if(self.pic_flag){
                     let image=new Image();
@@ -137,18 +141,35 @@
                     let canvas=document.createElement('canvas');
                     let ctx=canvas.getContext('2d');
                     image.onload=function () {
-                        canvas.width=wid;
-                        canvas.height=hei;
+                        let cw=image.width;
+                        let ch=image.height;
+                        let w=image.width;
+                        let h=image.height;
+                        canvas.width=image.width;
+                        canvas.height=image.height;
+                        if(cw>800&&cw>ch){
+                            w=800;
+                            h=(600*ch)/cw;
+                            canvas.width=w;
+                            canvas.height=h;
+                        }
+                        if(ch>600&&ch>cw){
+                            h=600;
+                            w=(800*cw)/ch;
+                            canvas.width=w;
+                            canvas.height=h;
+
+                        }
                          ctx.fillStyle='#fff';
                             ctx.fillRect(0,0,canvas.width,canvas.height);
-                        ctx.drawImage(image,0,0,wid,hei);
+                        ctx.drawImage(image,0,0,canvas.width,canvas.height);
                         let img=canvas.toDataURL("image/jpeg",1);
                          self.max_pic=img;
                          self.max_show=true;
                          let max_div=document.getElementById('max_show');
                          max_div.style.height=document.body.clientHeight;
                          let max_img=document.getElementById('max_img');
-                        max_img.style.marginTop=(document.documentElement.clientHeight-hei)/2+'px';
+                        max_img.style.marginTop=(document.documentElement.clientHeight-canvas.height)/2+'px';
 //                        console.log(this.max_pic);
 
                     }
@@ -191,5 +212,11 @@
     #max_img{
      /*vertical-align: middle;*/
      position: relative;
+    }
+    .fade-enter-active, .fade-leave-active {
+        transition: opacity .5s;
+    }
+    .fade-enter, .fade-leave-active {
+        opacity: 0;
     }
 </style>
