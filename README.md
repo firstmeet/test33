@@ -1,2 +1,1 @@
-# test33
-11
+此项目为上传文件并预览和放大的demo，使用vue.js和webpack
